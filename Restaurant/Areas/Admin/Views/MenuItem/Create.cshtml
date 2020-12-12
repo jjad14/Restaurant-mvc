@@ -9,7 +9,7 @@
 <h2 class="text-info">Create Menu Item</h2>
 <br />
 
-<form method="post" enctype="multipart/form-data">
+<form method="post" asp-action="Create" enctype="multipart/form-data">
     <div class="border backgroundWhite">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group row">
@@ -65,7 +65,8 @@
             </div>
             <div class="col-5">
                 <select asp-for="@Model.MenuItem.SubCategoryId"
-                        id="CategoryId"
+                        name="SubCategoryId"
+                        id="SubCategoryId"
                         asp-items="@(new SelectList(string.Empty, "Id", "Name"))"
                         class="form-control">
                 </select>

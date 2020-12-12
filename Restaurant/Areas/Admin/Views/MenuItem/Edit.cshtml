@@ -9,7 +9,7 @@
 <h2 class="text-info">Edit Menu Item</h2>
 <br />
 
-<form method="post" enctype="multipart/form-data">
+<form method="post" asp-action="Edit" enctype="multipart/form-data">
     <div class="border backgroundWhite row">
         <input type="hidden" asp-for="MenuItem.Id" />
 
@@ -69,7 +69,8 @@
                 </div>
                 <div class="col-8">
                     <select asp-for="@Model.MenuItem.SubCategoryId"
-                            id="CategoryId"
+                            name="SubCategoryId"
+                            id="SubCategoryId"
                             asp-items="@(new SelectList(string.Empty, "Id", "Name"))"
                             class="form-control">
                     </select>
@@ -93,7 +94,7 @@
 
         <div class="col-8">
             <div class="col-8 offset-4">
-                <partial name="_EditAndBackToListButton" model="Model.MenuItem.Id" />
+                <partial name="_EditAndBackToList" model="Model.MenuItem.Id" />
             </div>
         </div>
 
