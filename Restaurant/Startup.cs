@@ -12,6 +12,8 @@ using Restaurant.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Restaurant.Services;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace Restaurant
 {
@@ -31,12 +33,24 @@ namespace Restaurant
                 options.UseMySql(
                     Configuration.GetConnectionString("DefaultConnection")));
             
-            services.AddDefaultIdentity<IdentityUser>()
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddSingleton<IEmailSender, EmailSender>();
             
             services.AddControllersWithViews();
 
             services.AddRazorPages().AddRazorRuntimeCompilation();
+
+            // default paths to login/logout and access denied
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = $"/Identity/Account/Login";
+                options.LogoutPath = $"/Identity/Account/Logout";
+                options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,7 +72,10 @@ namespace Restaurant
 
             app.UseRouting();
 
+            // Authentication means that you have to authenticate the credentials of a user.
             app.UseAuthentication();
+
+            // Authorization is defined as what access a certain user has
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -14,6 +14,7 @@ namespace Restaurant.Data
         {
         }
 
+        public DbSet<ApplicationUser> ApplicationUser { get; set; }
         public DbSet<Category> Category { get; set; }
         public DbSet<SubCategory> SubCategory { get; set; }
         public DbSet<MenuItem> MenuItem { get; set; }
