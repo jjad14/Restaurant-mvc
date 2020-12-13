@@ -35,18 +35,22 @@ namespace Restaurant.Areas.Admin.Controllers
 
         public async Task<IActionResult> Lock(string id)
         {
+            // id is null
             if (id == null)
             {
                 return NotFound();
             }
 
+            // get user via the id
             var applicationUser = await _db.ApplicationUser.FirstOrDefaultAsync(m => m.Id == id);
 
+            // no user is found
             if(applicationUser == null)
             {
                 return NotFound();
             }
 
+            // lock user for 30 days
             applicationUser.LockoutEnd = DateTime.Now.AddDays(30);
 
             await _db.SaveChangesAsync();
@@ -57,18 +61,22 @@ namespace Restaurant.Areas.Admin.Controllers
 
         public async Task<IActionResult> Unlock(string id)
         {
+            // id is null
             if (id == null)
             {
                 return NotFound();
             }
 
+            // get user via the id
             var applicationUser = await _db.ApplicationUser.FirstOrDefaultAsync(m => m.Id == id);
 
+            // no user is found
             if (applicationUser == null)
             {
                 return NotFound();
             }
 
+            // set LockoutEnd date to now - so user is now unlocked
             applicationUser.LockoutEnd = DateTime.Now;
 
             await _db.SaveChangesAsync();

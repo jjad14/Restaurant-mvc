@@ -25,6 +25,7 @@ namespace Restaurant.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
+            // return list of coupons
             var coupons = await _db.Coupon.ToListAsync();
 
             return View(coupons);
@@ -39,6 +40,7 @@ namespace Restaurant.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Coupon coupon)
         {
+            // the images for our coupons will not be saved on the server but rather on the database
             if (ModelState.IsValid)
             {
                 // if it is valid we'll fetch the file that was uploaded for the image 
@@ -76,13 +78,16 @@ namespace Restaurant.Areas.Admin.Controllers
         //GET - EDIT
         public async Task<IActionResult> Edit(int? id)
         {
+            // no id passed
             if (id == null)
             {
                 return NotFound();
             }
 
+            // get coupon by id
             var coupon = await _db.Coupon.SingleOrDefaultAsync(m => m.Id == id);
 
+            // no coupon exists
             if (coupon == null)
             {
                 return NotFound();
@@ -95,18 +100,24 @@ namespace Restaurant.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Coupon coupon)
         {
+            // coupon does not exist
             if (coupon.Id == 0)
             {
                 return NotFound();
             }
 
+            // get coupon by id
             var couponFromDb = await _db.Coupon.Where(c => c.Id == coupon.Id).FirstOrDefaultAsync();
 
             if (ModelState.IsValid)
             {
+                // if it is valid we'll fetch the file that was uploaded for the image 
                 var files = HttpContext.Request.Form.Files;
+                // file was uploaded
                 if (files.Count > 0)
                 {
+                    // we are saving the image on the database rather than the server
+                    // image will be saved in byte array
                     byte[] p1 = null;
                     using (var fs1 = files[0].OpenReadStream())
                     {
@@ -118,6 +129,8 @@ namespace Restaurant.Areas.Admin.Controllers
                     }
                     couponFromDb.Picture = p1;
                 }
+                // no file was uploaded
+                // update the other properties
                 couponFromDb.MinimumAmount = coupon.MinimumAmount;
                 couponFromDb.Name = coupon.Name;
                 couponFromDb.Discount = coupon.Discount;
@@ -132,14 +145,17 @@ namespace Restaurant.Areas.Admin.Controllers
 
         public async Task<IActionResult> Details(int? id)
         {
+            // no id passed
             if (id == null)
             {
                 return NotFound();
             }
 
+            // get coupon by id
             var coupon = await _db.Coupon
                 .FirstOrDefaultAsync(m => m.Id == id);
 
+            // coupon does not exist
             if (coupon == null)
             {
                 return NotFound();
@@ -151,11 +167,13 @@ namespace Restaurant.Areas.Admin.Controllers
         //GET - DELETE
         public async Task<IActionResult> Delete(int? id)
         {
+            // no id passed
             if (id == null)
             {
                 return NotFound();
             }
 
+            // get coupon by id
             var coupon = await _db.Coupon.SingleOrDefaultAsync(m => m.Id == id);
 
             if (coupon == null)
@@ -163,6 +181,7 @@ namespace Restaurant.Areas.Admin.Controllers
                 return NotFound();
             }
 
+            // return coupon to view
             return View(coupon);
         }
 
@@ -171,6 +190,7 @@ namespace Restaurant.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            // get coupon by id and remove it from db
             var coupons = await _db.Coupon.SingleOrDefaultAsync(m => m.Id == id);
             _db.Coupon.Remove(coupons);
 

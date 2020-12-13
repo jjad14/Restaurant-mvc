@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace Restaurant.Utility
 {
+    // Static Details
     public static class SD
     {
         public const string DefaultFoodImage = "default_food.png";
@@ -13,5 +14,7 @@ namespace Restaurant.Utility
         public const string KitchenUser = "Kitchen";
         public const string FrontDeskUser = "FrontDesk";
         public const string CustomerUser = "Customer";
+
+        public const string ssShoppingCartCount = "ssCartCount";
     }
 }

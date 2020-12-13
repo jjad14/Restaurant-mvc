@@ -19,5 +19,6 @@ namespace Restaurant.Data
         public DbSet<SubCategory> SubCategory { get; set; }
         public DbSet<MenuItem> MenuItem { get; set; }
         public DbSet<Coupon> Coupon { get; set; }
+        public DbSet<ShoppingCart> ShoppingCart { get; set; }
     }
 }

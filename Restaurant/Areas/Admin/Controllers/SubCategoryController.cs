@@ -30,6 +30,7 @@ namespace Restaurant.Areas.Admin.Controllers
         // GET index
         public async Task<IActionResult> Index()
         {
+            // return list of subcategories
             var subCategories = await _db.SubCategory.Include(s => s.Category).ToListAsync();
 
             return View(subCategories);
@@ -38,6 +39,7 @@ namespace Restaurant.Areas.Admin.Controllers
         // GET - CREATE 
         public async Task<IActionResult> Create()
         {
+            // populate view model
             SubCategoryAndCategoryViewModel model = new SubCategoryAndCategoryViewModel()
             {
                 CategoryList = await _db.Category.ToListAsync(),
@@ -55,10 +57,12 @@ namespace Restaurant.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
+                // get the subcategory if it exists - keeps subcategories unique
                 var doesSubCategoryExist = _db.SubCategory
                     .Include(s => s.Category)
                     .Where(s => s.Name == model.SubCategory.Name && s.Category.Id == model.SubCategory.CategoryId);
 
+                // if count is greater than 0 then subcategory exists
                 if (doesSubCategoryExist.Count() > 0)
                 {
                     // Error
@@ -66,6 +70,7 @@ namespace Restaurant.Areas.Admin.Controllers
                 }
                 else
                 {
+                    // add subcategory to db
                     _db.SubCategory.Add(model.SubCategory);
                     await _db.SaveChangesAsync();
 
@@ -73,6 +78,7 @@ namespace Restaurant.Areas.Admin.Controllers
                 }
             }
 
+            // modelstate is invalid - return view model
             SubCategoryAndCategoryViewModel modelVm = new SubCategoryAndCategoryViewModel()
             {
                 CategoryList = await _db.Category.ToListAsync(),
@@ -89,28 +95,34 @@ namespace Restaurant.Areas.Admin.Controllers
         {
             List<SubCategory> subCategories = new List<SubCategory>();
 
+            // get a list of subcategories from a specific category
             subCategories = await (from subCategory in _db.SubCategory
                              where subCategory.CategoryId == id
                              select subCategory).ToListAsync();
 
+            // return as a json response
             return Json(new SelectList(subCategories, "Id", "Name"));
         }
 
         // GET - EDIT 
         public async Task<IActionResult> Edit(int? id)
         {
+            // no id 
             if(id == null)
             {
                 return NotFound();
             }
 
+            // get subcategory via the id
             var subCategory = await _db.SubCategory.SingleOrDefaultAsync(m => m.Id == id);
 
+            // no subcategory exists
             if (subCategory == null)
             {
                 return NotFound();
             }
 
+            // populate and return view model
             SubCategoryAndCategoryViewModel model = new SubCategoryAndCategoryViewModel()
             {
                 CategoryList = await _db.Category.ToListAsync(),
@@ -128,10 +140,12 @@ namespace Restaurant.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
+                // check if subcategory exists by checking if names match and by the category id
                 var doesSubCategoryExist = _db.SubCategory
                     .Include(s => s.Category)
                     .Where(s => s.Name == model.SubCategory.Name && s.Category.Id == model.SubCategory.CategoryId);
 
+                // edited subcategory already exists
                 if (doesSubCategoryExist.Count() > 0)
                 {
                     // Error, it is not a distinct entry inside the same category
@@ -139,7 +153,9 @@ namespace Restaurant.Areas.Admin.Controllers
                 }
                 else
                 {
+                    // get the subcategory from the db
                     var subCatFromDb = await _db.SubCategory.FindAsync(model.SubCategory.Id);
+                    // update name
                     subCatFromDb.Name = model.SubCategory.Name;
 
                     await _db.SaveChangesAsync();
@@ -148,6 +164,7 @@ namespace Restaurant.Areas.Admin.Controllers
                 }
             }
 
+            // model state is invalid, return view model
             SubCategoryAndCategoryViewModel modelVm = new SubCategoryAndCategoryViewModel()
             {
                 CategoryList = await _db.Category.ToListAsync(),
@@ -164,13 +181,16 @@ namespace Restaurant.Areas.Admin.Controllers
         // GET - DETAILS
         public async Task<IActionResult> Details(int? id)
         {
+            // no id passed
             if (id == null)
             {
                 return NotFound();
             }
 
+            // get subcategory via id
             var subCategory = await _db.SubCategory.Include(s => s.Category).SingleOrDefaultAsync(m => m.Id == id);
 
+            // no subcategory exists
             if (subCategory == null)
             {
                 return NotFound();
@@ -182,13 +202,16 @@ namespace Restaurant.Areas.Admin.Controllers
         // GET - DELETE
         public async Task<IActionResult> Delete(int? id)
         {
+            // no id passed
             if (id == null)
             {
                 return NotFound();
             }
 
+            // get subcategory via id
             var subCategory = await _db.SubCategory.Include(s => s.Category).SingleOrDefaultAsync(m => m.Id == id);
 
+            // no subcategory exists
             if (subCategory == null)
             {
                 return NotFound();
@@ -201,8 +224,10 @@ namespace Restaurant.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            // get subcategory by id
             var subCategory = await _db.SubCategory.Include(s => s.Category).SingleOrDefaultAsync(m => m.Id == id);
 
+            // remove subcategory from db
             _db.SubCategory.Remove(subCategory);
 
             await _db.SaveChangesAsync();

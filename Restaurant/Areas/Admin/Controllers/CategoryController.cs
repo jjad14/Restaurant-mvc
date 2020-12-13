@@ -24,6 +24,7 @@ namespace Restaurant.Areas.Admin.Controllers
         // GET
         public async Task<IActionResult> Index()
         {
+            // return list of categories
             return View(await _db.Category.ToListAsync());
         }
 
@@ -40,11 +41,11 @@ namespace Restaurant.Areas.Admin.Controllers
         {
             if(ModelState.IsValid)
             {
+                // add category to db
                 _db.Category.Add(category);
                 await _db.SaveChangesAsync();
 
-                return RedirectToAction("Index");
-                // return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
             }
 
             return View(category);
@@ -53,13 +54,16 @@ namespace Restaurant.Areas.Admin.Controllers
         // GET- EDIT
         public async Task<IActionResult> Edit(int? id)
         {
+            // no id was passed
             if (id == null)
             {
                 return NotFound();
             }
 
+            // find category by id
             var category = await _db.Category.FindAsync(id);
 
+            // no category exists
             if (category == null)
             {
                 return NotFound();
@@ -75,6 +79,7 @@ namespace Restaurant.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
+                // update category
                 _db.Category.Update(category);
                 await _db.SaveChangesAsync();
 
@@ -87,13 +92,16 @@ namespace Restaurant.Areas.Admin.Controllers
         // GET - DELETE
         public async Task<IActionResult> Delete(int? id)
         {
+            // no id was passed
             if (id == null)
             {
                 return NotFound();
             }
 
+            // find category by id
             var category = await _db.Category.FindAsync(id);
 
+            // no category exists
             if (category == null)
             {
                 return NotFound();
@@ -107,13 +115,16 @@ namespace Restaurant.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
+            // find category by id
             var category = await _db.Category.FindAsync(id);
 
+            // no category exists
             if (category == null)
             {
                 return View();
             }
 
+            // delete category from db
             _db.Category.Remove(category);
 
             await _db.SaveChangesAsync();
@@ -124,13 +135,16 @@ namespace Restaurant.Areas.Admin.Controllers
         // GET - DETAILS
         public async Task<IActionResult> Details(int? id)
         {
+            // no id was passed
             if (id == null)
             {
                 return NotFound();
             }
 
+            // find category by id
             var category = await _db.Category.FindAsync(id);
 
+            // no category exists
             if (category == null)
             {
                 return NotFound();

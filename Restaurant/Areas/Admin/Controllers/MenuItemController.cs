@@ -29,6 +29,7 @@ namespace Restaurant.Areas.Admin.Controllers
             _db = db;
             _host = host;
 
+            // initalize menu item
             MenuItemVM = new MenuItemViewModel() 
             {
                 Category = _db.Category,
@@ -38,6 +39,7 @@ namespace Restaurant.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
+            // get list of menu items
             var menuItems = await _db.MenuItem.Include(m => m.Category).Include(m => m.SubCategory).ToListAsync();
 
             return View(menuItems);
@@ -53,6 +55,7 @@ namespace Restaurant.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreatePost()
         {
+            // get subcategory id
             MenuItemVM.MenuItem.SubCategoryId = Convert.ToInt32(Request.Form["SubCategoryId"].ToString());
 
             if (!ModelState.IsValid)
@@ -60,26 +63,34 @@ namespace Restaurant.Areas.Admin.Controllers
                 return View(MenuItemVM);
             }
 
+            // add menu item
             _db.MenuItem.Add(MenuItemVM.MenuItem);
             await _db.SaveChangesAsync();
 
             // Save Image section
+            // get wwwroot path
             string webRootPath = _host.WebRootPath;
             var files = HttpContext.Request.Form.Files;
 
+            // get menu item
             var menuItemFromDb = await _db.MenuItem.FindAsync(MenuItemVM.MenuItem.Id);
 
+            // file has been uploaded
             if (files.Count > 0)
             {
-                // file has been uploaded
+                // add images to wwwroot path (access images)
                 var uploads = Path.Combine(webRootPath, "images");
+                // get file extension
                 var extension = Path.GetExtension(files[0].FileName);
 
+                // creating file, renaming it
                 using (var fileStream = new FileStream(Path.Combine(uploads, MenuItemVM.MenuItem.Id + extension), FileMode.Create))
                 {
+                    // copy file to file stream
                     files[0].CopyTo(fileStream);
                 }
 
+                // add new file name with path to the menuItemFromDb
                 menuItemFromDb.Image = @"\images\" + MenuItemVM.MenuItem.Id + extension;
             }
             else
@@ -98,20 +109,24 @@ namespace Restaurant.Areas.Admin.Controllers
         // GET - EDIT
         public async Task<IActionResult> Edit(int? id)
         {
+            // no id passed
             if (id == null)
             {
                 return NotFound();
             }
 
+            // get menu item
             MenuItemVM.MenuItem = await _db.MenuItem
                                         .Include(p => p.Category)
                                         .Include(p => p.SubCategory)
                                         .SingleOrDefaultAsync(p => p.Id == id);
 
+            // get subcategories
             MenuItemVM.SubCategory = await _db.SubCategory
                                         .Where(s => s.CategoryId == MenuItemVM.MenuItem.CategoryId)
                                         .ToListAsync();
 
+            // no menu item exists
             if (MenuItemVM.MenuItem == null)
             {
                 return NotFound();
@@ -185,16 +200,19 @@ namespace Restaurant.Areas.Admin.Controllers
         //GET - DETAILS 
         public async Task<IActionResult> Details(int? id)
         {
+            // no id passed
             if (id == null)
             {
                 return NotFound();
             }
 
+            // get menu item
             MenuItemVM.MenuItem = await _db.MenuItem
                                     .Include(m => m.Category)
                                     .Include(m => m.SubCategory)
                                     .SingleOrDefaultAsync(m => m.Id == id);
 
+            // no menu item exists
             if (MenuItemVM.MenuItem == null)
             {
                 return NotFound();
@@ -206,16 +224,19 @@ namespace Restaurant.Areas.Admin.Controllers
         //GET - DELETE
         public async Task<IActionResult> Delete(int? id)
         {
+            // no id passed
             if (id == null)
             {
                 return NotFound();
             }
 
+            // get menu item
             MenuItemVM.MenuItem = await _db.MenuItem
                                     .Include(m => m.Category)
                                     .Include(m => m.SubCategory)
                                     .SingleOrDefaultAsync(m => m.Id == id);
 
+            // menu item does not exist
             if (MenuItemVM.MenuItem == null)
             {
                 return NotFound();
@@ -229,20 +250,27 @@ namespace Restaurant.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            // get wwwroot path
             string webRootPath = _host.WebRootPath;
+
+            // find menu item by id
             MenuItem menuItem = await _db.MenuItem.FindAsync(id);
 
+            // menu item does not exist
             if (menuItem != null)
             {
+                // get image path of menu item
                 var imagePath = Path.Combine(webRootPath, menuItem.Image.TrimStart('\\'));
 
+                // if the image exists then delete it
                 if (System.IO.File.Exists(imagePath))
                 {
                     System.IO.File.Delete(imagePath);
                 }
+                // remove menu item from db
                 _db.MenuItem.Remove(menuItem);
-                await _db.SaveChangesAsync();
 
+                await _db.SaveChangesAsync();
             }
 
             return RedirectToAction(nameof(Index));

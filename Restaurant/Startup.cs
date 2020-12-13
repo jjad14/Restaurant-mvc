@@ -29,10 +29,12 @@ namespace Restaurant
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // mysql database config
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseMySql(
                     Configuration.GetConnectionString("DefaultConnection")));
             
+            // identity config
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -50,6 +52,14 @@ namespace Restaurant
                 options.LogoutPath = $"/Identity/Account/Logout";
                 options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
 
+            });
+
+            // Session configuration - also in Configure
+            services.AddSession(options =>
+            {
+                options.Cookie.IsEssential = true;
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
             });
         }
 
@@ -71,6 +81,8 @@ namespace Restaurant
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseSession();
 
             // Authentication means that you have to authenticate the credentials of a user.
             app.UseAuthentication();
