@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Restaurant.Data;
 
 namespace Restaurant.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201213204212_AddOrderHeaderAndOrderDetailsToDb")]
+    partial class AddOrderHeaderAndOrderDetailsToDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -364,8 +366,8 @@ namespace Restaurant.Migrations
                     b.Property<string>("PickupName")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<DateTime>("PickupTime")
-                        .HasColumnType("datetime(6)");
+                    b.Property<int>("PickupTime")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");

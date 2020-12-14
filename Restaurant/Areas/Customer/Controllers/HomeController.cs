@@ -35,7 +35,7 @@ namespace Restaurant.Controllers
             {
                 MenuItems = await _db.MenuItem.Include(m => m.Category).Include(m => m.SubCategory).ToListAsync(),
                 Categories = await _db.Category.ToListAsync(),
-                Coupons = await _db.Coupon.Where(c => c.IsActive).ToListAsync()
+                Coupons = await _db.Coupon.Where(c => c.IsActive == true).ToListAsync()
             };
 
             // get current user
@@ -60,9 +60,16 @@ namespace Restaurant.Controllers
         {
             // get menu item by id
             var menuItemFromDb = await _db.MenuItem
+                                    .Include(m => m.Category)
                                     .Include(m => m.SubCategory)
                                     .Where(m => m.Id == id)
                                     .FirstOrDefaultAsync();
+
+            // no menu item exists
+            if (menuItemFromDb == null)
+            {
+                return NotFound();
+            }
 
             // populate shopping cart
             ShoppingCart shoppingCart = new ShoppingCart()
@@ -70,12 +77,6 @@ namespace Restaurant.Controllers
                 MenuItem = menuItemFromDb,
                 MenuItemId = menuItemFromDb.Id
             };
-
-            // no menu item exists
-            if (menuItemFromDb == null)
-            {
-                return NotFound();
-            }
 
             return View(shoppingCart);
         }
@@ -103,7 +104,7 @@ namespace Restaurant.Controllers
                                             .FirstOrDefaultAsync();
 
                 // menu item is not in the shopping cart so we add it
-                if (cart == null)
+                if (cartFromDb == null)
                 {
                    await _db.ShoppingCart.AddAsync(cart);
                 }
@@ -128,6 +129,7 @@ namespace Restaurant.Controllers
             {
                 // model state is invalid, so we pass the menu item details again
                 var menuItemFromDb = await _db.MenuItem
+                                        .Include(m => m.Category)
                                         .Include(m => m.SubCategory)
                                         .Where(m => m.Id == cart.MenuItemId)
                                         .FirstOrDefaultAsync();

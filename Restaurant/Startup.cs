@@ -14,6 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Restaurant.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Restaurant.Utility;
+using Stripe;
 
 namespace Restaurant
 {
@@ -38,6 +40,9 @@ namespace Restaurant
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            // Stripe Configuration
+            services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
 
             services.AddSingleton<IEmailSender, EmailSender>();
             
@@ -77,10 +82,13 @@ namespace Restaurant
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            StripeConfiguration.ApiKey = Configuration.GetSection("Stripe")["SecretKey"];
 
             app.UseSession();
 
