@@ -59,6 +59,20 @@ namespace Restaurant
 
             });
 
+            // facebook authentication
+            services.AddAuthentication().AddFacebook(facebookOptions =>
+            {
+                facebookOptions.AppId = "389441985636910";
+                facebookOptions.AppSecret = "055c2cc80e078faa5c7a3f67fcb4a776";
+            });
+
+            // google authentication
+            services.AddAuthentication().AddGoogle(googleOptions =>
+            {
+                googleOptions.ClientId = "258408073549-nskqghgrm0ka67mhmtg6kopmlpfnl5a8.apps.googleusercontent.com";
+                googleOptions.ClientSecret = "TbFC8ZogOVc6hbcQbOOXqhX5";
+            });
+
             // Session configuration - also in Configure
             services.AddSession(options =>
             {
