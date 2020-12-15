@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -176,5 +177,135 @@ namespace Restaurant.Areas.Customer.Controllers
 
             return RedirectToAction("ManageOrder", "Order");
         }
+
+        [Authorize]
+        public async Task<IActionResult> OrderPickup(int productPage = 1, string searchEmail = null, string searchPhone = null, string searchName = null)
+        {
+
+            OrderListViewModel orderListVM = new OrderListViewModel()
+            {
+                Orders = new List<OrderDetailsViewModel>()
+            };
+
+            // build query param string
+            StringBuilder builder = new StringBuilder();
+            builder.Append("/Customer/Order/OrderPickup?productPage=:");
+
+            builder.Append("&searchName=");
+            if(searchName != null)
+            {
+                builder.Append(searchName);
+            }
+
+            builder.Append("&searchEmail=");
+            if (searchEmail != null)
+            {
+                builder.Append(searchEmail);
+            }
+            builder.Append("&searchPhone=");
+            if (searchPhone != null)
+            {
+                builder.Append(searchPhone);
+            }
+
+            List<OrderHeader> OrderHeaderList = new List<OrderHeader>();
+
+            // filter order header list by params
+            if (searchName != null || searchEmail != null || searchPhone != null)
+            {
+                var user = new ApplicationUser();
+
+                // filter by name
+                if (searchName != null)
+                {
+                    OrderHeaderList = await _db.OrderHeader
+                                        .Include(m => m.ApplicationUser)
+                                        .Where(m => m.PickupName.ToLower().Contains(searchName.ToLower()))
+                                        .OrderByDescending(m => m.OrderDate)
+                                        .ToListAsync();
+                }
+                else
+                {
+                    // filter by email
+                    if (searchEmail != null)
+                    {
+                        user = await _db.ApplicationUser.Where(u => u.Email.ToLower().Contains(searchName.ToLower())).FirstOrDefaultAsync();
+                        OrderHeaderList = await _db.OrderHeader
+                                            .Include(m => m.ApplicationUser)
+                                            .Where(m => m.UserId == user.Id)
+                                            .OrderByDescending(m => m.OrderDate)
+                                            .ToListAsync();
+                    }
+                    else
+                    {
+                        // filter by phone
+                        if (searchPhone != null)
+                        {
+                            OrderHeaderList = await _db.OrderHeader
+                                                .Include(m => m.ApplicationUser)
+                                                .Where(m => m.PhoneNumber.Contains(searchPhone))
+                                                .OrderByDescending(m => m.OrderDate)
+                                                .ToListAsync();
+                        }
+                    }
+                }
+
+            }
+            else
+            {
+                // get all the order headers with status ready
+               OrderHeaderList = await _db.OrderHeader
+                                                        .Include(o => o.ApplicationUser)
+                                                        .Where(u => u.Status == SD.StatusReady)
+                                                        .ToListAsync();
+
+            }
+
+            // for each order header, populate the OrderDetailsViewModel view model
+            foreach (OrderHeader item in OrderHeaderList)
+            {
+                OrderDetailsViewModel individual = new OrderDetailsViewModel
+                {
+                    OrderHeader = item,
+                    OrderDetails = await _db.OrderDetails.Where(o => o.OrderId == item.Id).ToListAsync()
+                };
+
+                // add the individual OrderDetailsViewModel to the list
+                orderListVM.Orders.Add(individual);
+            }
+
+            // paging info - total number of orders
+            var count = orderListVM.Orders.Count;
+            // paginate the info
+            orderListVM.Orders = orderListVM.Orders.OrderByDescending(p => p.OrderHeader.Id)
+                                 .Skip((productPage - 1) * PageSize)
+                                 .Take(PageSize).ToList();
+
+            // populate paging info in view model
+            orderListVM.PagingInfo = new PagingInfo
+            {
+                CurrentPage = productPage,
+                ItemsPerPage = PageSize,
+                TotalItems = count,
+                // custom tag helper will remove colon with value as anchor tag
+                urlParam = builder.ToString()
+            };
+
+            return View(orderListVM);
+        }
+
+        [Authorize(Roles = SD.FrontDeskUser + "," + SD.ManagerUser)]
+        [HttpPost]
+        [ActionName("OrderPickup")]
+        public async Task<IActionResult> OrderPickupPost(int orderId)
+        {
+            // change order status to cancelled
+            OrderHeader orderHeader = await _db.OrderHeader.FindAsync(orderId);
+            orderHeader.Status = SD.StatusCompleted;
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("OrderPickup", "Order");
+        }
+
     }
 }
