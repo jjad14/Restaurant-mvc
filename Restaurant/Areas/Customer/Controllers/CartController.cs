@@ -228,9 +228,9 @@ namespace Restaurant.Areas.Customer.Controllers
 
             await _db.SaveChangesAsync();
 
-            return RedirectToAction("Index", "Home");
+            // return RedirectToAction("Index", "Home");
 
-            // return RedirectToAction("Confirm", "Order", new { id = cartVM.OrderHeader.Id });
+            return RedirectToAction("Confirm", "Order", new { id = cartVM.OrderHeader.Id });
         }
 
         public IActionResult AddCoupon()
